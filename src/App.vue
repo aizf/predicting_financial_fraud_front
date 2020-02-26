@@ -1,94 +1,24 @@
 <template>
   <div id="app">
     <div :style="{margin:'0 0 0 0'}">
-      <a-card title="数设置据集" :style="{width: '500px',float:'left'}">
-        <p>blackList</p>
-        <a-checkbox :checked="blackList" @change="blackList=!blackList">blackList</a-checkbox>
-        <a-divider />
-
-        <p>selectedDims</p>
-        <a-row>
-          <a-col v-for="item in Object.keys(dims)" :span="6" :key="item">
-            <a-checkbox :checked="dims[item]" @change="dims[item]=!dims[item]">{{item}}</a-checkbox>
-          </a-col>
-        </a-row>
-        <a-divider />
-
-        <p>train_test_ratio</p>
-        <a-input-number :min="0" :max="1" :step="0.1" v-model="train_test_ratio" />
-        <a-divider />
-
-        <p>multiple</p>
-        <a-input-number :min="0" :step="0.1" v-model="multiple" />
-        <a-divider />
-      </a-card>
-      <a-card title="RandomForest" :style="{width: '360px',float:'left'}">
-        <p>n_estimators</p>
-        <a-input-number :min="1" :step="1" v-model="n_estimators" />
-        <a-divider />
-        <p>特征重要性</p>
-        <a-row>
-          <a-col :span="12">
-            <a-row v-for="dim in selectedDims" :key="dim">{{dim}}</a-row>
-          </a-col>
-
-          <a-col :span="12">
-            <a-row v-for="(fi,index) in scores.RandomForest.feature_importances" :key="index">{{fi}}</a-row>
-          </a-col>
-        </a-row>
-        <a-divider />
-        <a-row>
-          <a-col :span="12">
-            <p>未舞弊公司正确预测率：</p>
-          </a-col>
-          <a-col :span="12">
-            <p>{{scores.RandomForest.label_0_score}}</p>
-          </a-col>
-          <a-col :span="12">
-            <p>舞弊公司正确预测率：</p>
-          </a-col>
-          <a-col :span="12">
-            <p>{{scores.RandomForest.label_1_score}}</p>
-          </a-col>
-          <a-col :span="12">
-            <p>总体正确预测率：</p>
-          </a-col>
-          <a-col :span="12">
-            <p>{{scores.RandomForest.score}}</p>
-          </a-col>
-        </a-row>
-      </a-card>
-      <a-card title="LogisticRegression" :style="{width: '360px',float:'left'}">
-        <p>123213213</p>
-        <!-- <a-input-number :min="1" :step="1" v-model="n_estimators" /> -->
-        <a-divider />
-        <p>decision function</p>
-        <p>{{decisionFun}}</p>
-        <a-checkbox :checked="ifFixed" @change="ifFixed=!ifFixed"></a-checkbox>
-        <span>toFixed</span>
-        <a-input-number :min="0" :disabled="!ifFixed" v-model="toFixed" />
-        <a-divider />
-        <a-row>
-          <a-col :span="12">
-            <p>未舞弊公司正确预测率：</p>
-          </a-col>
-          <a-col :span="12">
-            <p>{{scores.LogisticRegression.label_0_score}}</p>
-          </a-col>
-          <a-col :span="12">
-            <p>舞弊公司正确预测率：</p>
-          </a-col>
-          <a-col :span="12">
-            <p>{{scores.LogisticRegression.label_1_score}}</p>
-          </a-col>
-          <a-col :span="12">
-            <p>总体正确预测率：</p>
-          </a-col>
-          <a-col :span="12">
-            <p>{{scores.LogisticRegression.score}}</p>
-          </a-col>
-        </a-row>
-      </a-card>
+      <VDataSet
+        ref="VDataSet"
+        :dims="dims"
+        @selectedDimsChange="handleSelectedDimsChange"
+        :style="{width: '500px',float:'left'}"
+      />
+      <VRandomForest
+        ref="VRandomForest"
+        :scores="scores"
+        :selectedDims="selectedDims"
+        :style="{width: '360px',float:'left'}"
+      />
+      <VLogisticRegression
+        :scores="scores"
+        :selectedDims="selectedDims"
+        :newClf="newClf"
+        :style="{width: '360px',float:'left'}"
+      />
     </div>
 
     <a-divider />
@@ -104,39 +34,39 @@
 <script>
 // import echarts from "echarts";
 import axios from "axios";
+import VDataSet from "@/components/VDataSet.vue";
+import VRandomForest from "@/components/VRandomForest.vue";
+import VLogisticRegression from "@/components/VLogisticRegression.vue";
 
 export default {
   name: "App",
-  components: {},
+  components: { VDataSet, VRandomForest, VLogisticRegression },
   mounted() {
     document.title = "芮憨憨";
     // console.log(this);
   },
   data() {
     return {
-      blackList: false,
-      dims: {
-        GAIN: false,
-        LOSS: false,
-        TATA1: false,
-        TATA2: false,
-        CHCS: false,
-        OTHREC: false,
-        GMI: false,
-        GMIII: false,
-        SGAI: false,
-        CHROA: false,
-        AQI: false,
-        LVGI: false,
-        DSRI: false,
-        SGI: false,
-        SOFTAS: false,
-        CHINV: false,
-        CHREC: false
-      },
-      train_test_ratio: 0.7,
-      multiple: 1,
-      n_estimators: 10,
+      dims: [
+        "GAIN",
+        "LOSS",
+        "TATA1",
+        "TATA2",
+        "CHCS",
+        "OTHREC",
+        "GMI",
+        "GMIII",
+        "SGAI",
+        "CHROA",
+        "AQI",
+        "LVGI",
+        "DSRI",
+        "SGI",
+        "SOFTAS",
+        "CHINV",
+        "CHREC"
+      ],
+      selectedDims: [],
       scores: {
         RandomForest: {
           label_0_score: "...",
@@ -151,10 +81,9 @@ export default {
           coef: "..."
         }
       },
+
+      newClf: false,
       loading: false,
-      decisionFun: "...",
-      ifFixed: true,
-      toFixed: 5,
       errors: null,
       res: {
         length: 0,
@@ -192,18 +121,8 @@ export default {
     };
   },
   computed: {
-    selectedDims() {
-      const dims = this.dims;
-      const selectedDims = [];
-      Object.keys(dims).forEach(d => {
-        if (dims[d]) {
-          selectedDims.push(d);
-        }
-      });
-      return selectedDims;
-    },
     columns() {
-      const dims = Object.keys(this.dims);
+      const dims = this.dims;
 
       const col0 = [
         {
@@ -228,7 +147,7 @@ export default {
       return [...col0, ...col1];
     },
     dataSource() {
-      const dims = Object.keys(this.dims);
+      const dims = this.dims;
       const dicts = [];
       const n = this.res.length;
       for (let i = 0; i < n; i++) {
@@ -251,14 +170,15 @@ export default {
     commit() {
       this.loading = true;
       this.errors = null;
+      this.newClf = false;
       axios
         // .post("http://49.233.132.179:5000/predicting_financial_fraud", {
         .post("http://localhost:5000/predicting_financial_fraud", {
-          blackList: this.blackList,
+          blackList: this.$refs.VDataSet.blackList,
           selectedDims: this.selectedDims,
-          train_test_ratio: this.train_test_ratio,
-          multiple: this.multiple,
-          n_estimators: this.n_estimators
+          train_test_ratio: this.$refs.VDataSet.train_test_ratio,
+          multiple: this.$refs.VDataSet.multiple,
+          n_estimators: this.$refs.VRandomForest.n_estimators
         })
         .then(response => {
           // console.log(response);
@@ -267,9 +187,8 @@ export default {
           this.scores = data;
           this.saveRes();
 
+          this.newClf = true;
           this.loading = false;
-
-          this.getDecisionFun();
         })
         .catch(error => {
           // 请求失败处理
@@ -282,8 +201,8 @@ export default {
     saveRes() {
       const { dims, scores } = this.res;
       // dims
-      Object.keys(dims).forEach(d => {
-        if (this.dims[d]) {
+      this.dims.forEach(d => {
+        if (this.$refs.VDataSet.dimStatus[d]) {
           dims[d].push(1);
         } else {
           dims[d].push(0);
@@ -299,50 +218,12 @@ export default {
       });
       this.res.length++;
     },
-    getDecisionFun() {
-      const selectedDims = this.selectedDims;
-      const n = selectedDims.length;
-      // 数组合并比字符串相加快
-      const coefStr = [];
-      const coefficient = this.scores.LogisticRegression.coef[0];
-      // console.log(this.scores.LogisticRegression.coef);
-      const intercept = this.scores.LogisticRegression.intercept[0];
-      // console.log(this.scores.LogisticRegression.intercept);
-
-      for (let i = 0; i < n; i++) {
-        if (coefficient[i] >= 0 && i != 0) {
-          coefStr.push(" + ");
-        }
-        coefStr.push(
-          this.ifFixed ? coefficient[i].toFixed(this.toFixed) : coefficient[i]
-        );
-        coefStr.push(" * ");
-        coefStr.push(selectedDims[i]);
-      }
-
-      if (intercept >= 0) {
-        coefStr.push(" + ");
-      }
-      coefStr.push(this.ifFixed ? intercept.toFixed(this.toFixed) : intercept);
-
-      // console.log(coefStr);
-      this.decisionFun = coefStr.join("");
+    handleSelectedDimsChange(selectedDims) {
+      this.selectedDims = selectedDims;
+      // console.log(this.selectedDims);
     }
   },
-  watch: {
-    ifFixed() {
-      if (this.scores.LogisticRegression.coef === "...") {
-        return;
-      }
-      this.getDecisionFun();
-    },
-    toFixed() {
-      if (this.scores.LogisticRegression.coef === "...") {
-        return;
-      }
-      this.getDecisionFun();
-    }
-  }
+  watch: {}
 };
 </script>
 
