@@ -5,13 +5,14 @@ import App from './App.vue'
 import "ant-design-vue/dist/antd.css";
 import {
   Button,
+  Card,
   Checkbox,
-  // Col,
+  Col,
   Divider,
   // Icon,
   InputNumber,
   // message,
-  // Row
+  Row,
   Table
 } from 'ant-design-vue'
 
@@ -19,12 +20,13 @@ import {
 // Vue.prototype.$axios = axios;
 
 Vue.use(Button);
+Vue.use(Card);
 Vue.use(Checkbox);
-// Vue.use(Col);
+Vue.use(Col);
 Vue.use(Divider);
 // Vue.use(Icon);
 Vue.use(InputNumber);
-// Vue.use(Row);
+Vue.use(Row);
 Vue.use(Table);
 
 Vue.config.productionTip = false
