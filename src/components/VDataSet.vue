@@ -1,5 +1,12 @@
 <template>
   <a-card title="DataSet">
+    <p>Overview</p>
+    <p>训练集未舞弊公司数量：{{label_0_train}}</p>
+    <p>训练集舞弊公司数量：{{label_1_train}}</p>
+    <p>测试集未舞弊公司数量：{{label_0_test}}</p>
+    <p>测试集舞弊公司数量：{{label_1_test}}</p>
+    <a-divider />
+
     <p>blackList</p>
     <a-checkbox :checked="blackList" @change="blackList=!blackList">blackList</a-checkbox>
     <a-divider />
@@ -12,8 +19,8 @@
     </a-row>
     <a-divider />
 
-    <p>train_test_ratio</p>
-    <a-input-number :min="0" :max="1" :step="0.1" v-model="train_test_ratio" />
+    <p>train_ratio</p>
+    <a-input-number :min="0" :max="1" :step="0.1" v-model="train_ratio" />
     <a-divider />
 
     <p>multiple</p>
@@ -23,6 +30,7 @@
 </template>
 
 <script>
+import axios from "axios";
 export default {
   name: "VDataSet",
   props: {
@@ -30,8 +38,13 @@ export default {
   },
   data() {
     return {
+      label_0_train: "...",
+      label_1_train: "...",
+      label_0_test: "...",
+      label_1_test: "...",
       blackList: false,
       dimStatus: {
+        DEPI: false,
         GAIN: false,
         LOSS: false,
         TATA1: false,
@@ -50,7 +63,7 @@ export default {
         CHINV: false,
         CHREC: false
       },
-      train_test_ratio: 0.7,
+      train_ratio: 0.7,
       multiple: 1
     };
   },
@@ -65,11 +78,28 @@ export default {
       return selectedDims;
     }
   },
+  mounted() {},
   methods: {
     selectedDimsChange(item) {
       this.dimStatus[item] = !this.dimStatus[item];
       this.$emit("selectedDimsChange", this.selectedDims);
-    //   console.log(this.selectedDims);
+      //   console.log(this.selectedDims);
+    },
+    getDatasetOverview() {
+      return axios.post("/search_information", {
+        keys: [
+          "num_label_0_train",
+          "num_label_1_train",
+          "num_label_0_test",
+          "num_label_1_test"
+        ]
+      });
+    },
+    handleDatasetOverview(data) {
+      this.label_0_train = data["label_0_train"];
+      this.label_1_train = data["label_1_train"];
+      this.label_0_test = data["label_0_test"];
+      this.label_1_test = data["label_1_test"];
     }
   },
   watch: {}

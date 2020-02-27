@@ -13,7 +13,8 @@ import {
   InputNumber,
   // message,
   Row,
-  Table
+  Table,
+  Tabs
 } from 'ant-design-vue'
 
 // Vue.prototype.$message = message;
@@ -28,6 +29,7 @@ Vue.use(Divider);
 Vue.use(InputNumber);
 Vue.use(Row);
 Vue.use(Table);
+Vue.use(Tabs);
 
 Vue.config.productionTip = false
 

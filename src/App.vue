@@ -14,6 +14,7 @@
         :style="{width: '360px',float:'left'}"
       />
       <VLogisticRegression
+        ref="VLogisticRegression"
         :scores="scores"
         :selectedDims="selectedDims"
         :newClf="newClf"
@@ -43,11 +44,14 @@ export default {
   components: { VDataSet, VRandomForest, VLogisticRegression },
   mounted() {
     document.title = "芮憨憨";
+    // axios.defaults.baseURL = "http://localhost:5000";
+    axios.defaults.baseURL="http://49.233.132.179:5000"
     // console.log(this);
   },
   data() {
     return {
       dims: [
+        "DEPI",
         "GAIN",
         "LOSS",
         "TATA1",
@@ -88,6 +92,7 @@ export default {
       res: {
         length: 0,
         dims: {
+          DEPI: [],
           GAIN: [],
           LOSS: [],
           TATA1: [],
@@ -171,24 +176,15 @@ export default {
       this.loading = true;
       this.errors = null;
       this.newClf = false;
-      axios
-        // .post("http://49.233.132.179:5000/predicting_financial_fraud", {
-        .post("http://localhost:5000/predicting_financial_fraud", {
-          blackList: this.$refs.VDataSet.blackList,
-          selectedDims: this.selectedDims,
-          train_test_ratio: this.$refs.VDataSet.train_test_ratio,
-          multiple: this.$refs.VDataSet.multiple,
-          n_estimators: this.$refs.VRandomForest.n_estimators
-        })
-        .then(response => {
-          // console.log(response);
-          let data = response.data;
-          // console.log(data);
-          this.scores = data;
-          this.saveRes();
 
-          this.newClf = true;
-          this.loading = false;
+      this.getPredicting()
+        .then(pred => {
+          this.$refs.VDataSet.getDatasetOverview().then(dso => {
+            this.$refs.VDataSet.handleDatasetOverview(dso.data);
+            this.newClf = true;
+            this.loading = false;
+          });
+          this.handlePredicting(pred.data);
         })
         .catch(error => {
           // 请求失败处理
@@ -197,6 +193,48 @@ export default {
           // console.log(error);
           alert("bug了,芮憨憨！！！");
         });
+
+      // axios
+      //   .all([this.getPredicting(), this.$refs.VDataSet.getDatasetOverview()])
+      //   .then(
+      //     axios.spread((pred, dso) => {
+      //       // console.log(pred);
+      //       console.log(dso);
+      //       this.handlePredicting(pred.data);
+      //       this.$refs.VDataSet.handleDatasetOverview(dso.data);
+      //       this.newClf = true;
+      //       this.loading = false;
+      //     })
+      //   )
+      //   .catch(error => {
+      //     // 请求失败处理
+      //     this.loading = false;
+      //     this.errors = error;
+      //     // console.log(error);
+      //     alert("bug了,芮憨憨！！！");
+      //   });
+    },
+    getPredicting() {
+      const LR_type = this.$refs.VLogisticRegression.LR_type;
+      const data = {
+        blackList: this.$refs.VDataSet.blackList,
+        selectedDims: this.selectedDims,
+        train_ratio: this.$refs.VDataSet.train_ratio,
+        multiple: this.$refs.VDataSet.multiple,
+        n_estimators: this.$refs.VRandomForest.n_estimators,
+        LR_type: LR_type
+      };
+      if (LR_type === "2") {
+        data["coefficient"] = this.selectedDims.map(dim => {
+          return this.$refs.VLogisticRegression.custCoef[dim];
+        });
+        data["intercept"] = this.$refs.VLogisticRegression.custIntercept;
+      }
+      return axios.post("/predicting_financial_fraud", data);
+    },
+    handlePredicting(data) {
+      this.scores = data;
+      this.saveRes();
     },
     saveRes() {
       const { dims, scores } = this.res;

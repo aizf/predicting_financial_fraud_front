@@ -1,13 +1,29 @@
 <template>
   <a-card title="LogisticRegression">
-    <p>123213213</p>
-    <!-- <a-input-number :min="1" :step="1" v-model="n_estimators" /> -->
-    <a-divider />
-    <p>decision function</p>
-    <p>{{decisionFun}}</p>
-    <a-checkbox :checked="ifFixed" @change="ifFixed=!ifFixed"></a-checkbox>
-    <span>toFixed</span>
-    <a-input-number :min="0" :disabled="!ifFixed" v-model="toFixed" />
+    <a-tabs :defaultActiveKey="LR_type" @change="tabsChange">
+      <a-tab-pane tab="use model func" key="1" forceRender>
+        <p>{{decisionFun}}</p>
+        <a-checkbox :checked="ifFixed" @change="ifFixed=!ifFixed"></a-checkbox>
+        <span>toFixed</span>
+        <a-input-number :min="0" :disabled="!ifFixed" v-model="toFixed" />
+      </a-tab-pane>
+
+      <a-tab-pane tab="use customize func" key="2" forceRender>
+        <a-row v-for="dim in selectedDims" :key="dim">
+          <a-col :span="17">
+            <a-input-number size="small" v-model="custCoef[dim]" :style="{width:'90%'}" />
+          </a-col>
+          <a-col :span="2">
+            <span>*</span>
+          </a-col>
+          <a-col :span="5">{{dim}}</a-col>
+        </a-row>
+        <a-col :span="17">
+          <a-input-number size="small" v-model="custIntercept" :style="{width:'90%'}" />
+        </a-col>
+      </a-tab-pane>
+    </a-tabs>
+
     <a-divider />
     <a-row>
       <a-col :span="12">
@@ -41,8 +57,35 @@ export default {
     newClf: Boolean
   },
   data() {
-    return { decisionFun: "...", ifFixed: true, toFixed: 5 };
+    return {
+      decisionFun: "...",
+      ifFixed: true,
+      toFixed: 5,
+      custCoef: {
+        DEPI: 0,
+        GAIN: 0,
+        LOSS: 0,
+        TATA1: 0,
+        TATA2: 0,
+        CHCS: 0,
+        OTHREC: 0,
+        GMI: 0,
+        GMIII: 0,
+        SGAI: 0,
+        CHROA: 0,
+        AQI: 0,
+        LVGI: 0,
+        DSRI: 0,
+        SGI: 0,
+        SOFTAS: 0,
+        CHINV: 0,
+        CHREC: 0
+      },
+      custIntercept: 0,
+      LR_type: "1"
+    };
   },
+  computed: {},
   methods: {
     getDecisionFun() {
       const selectedDims = this.selectedDims;
@@ -72,6 +115,20 @@ export default {
 
       // console.log(coefStr);
       this.decisionFun = coefStr.join("");
+
+      this.resetCustCoefInter(coefficient, intercept);
+    },
+    resetCustCoefInter(coefficient, intercept) {
+      // 重置自定义参数
+
+      this.selectedDims.forEach((dim, i) => {
+        this.custCoef[dim] = coefficient[i];
+      });
+      this.custIntercept = intercept;
+    },
+    tabsChange(key) {
+      // console.log(typeof(key));
+      this.LR_type = key;
     }
   },
   watch: {
