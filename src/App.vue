@@ -23,7 +23,10 @@
     </div>
 
     <a-divider />
-    <a-button type="primary" :loading="loading" @click="commit">commit</a-button>
+    <div class="float-right">
+      <a-button :loading="loadingDownload" @click="download">Download Table</a-button>
+      <a-button type="primary" :loading="loadingCommit" @click="commit">commit</a-button>
+    </div>
     <a-divider />
 
     <p v-show="!!errors" :style="{color:'red'}">{{errors}}</p>
@@ -35,6 +38,7 @@
 <script>
 // import echarts from "echarts";
 import axios from "axios";
+import * as XLSX from "xlsx";
 import VDataSet from "@/components/VDataSet.vue";
 import VRandomForest from "@/components/VRandomForest.vue";
 import VLogisticRegression from "@/components/VLogisticRegression.vue";
@@ -44,8 +48,8 @@ export default {
   components: { VDataSet, VRandomForest, VLogisticRegression },
   mounted() {
     document.title = "芮憨憨";
-    // axios.defaults.baseURL = "http://localhost:5000";
-    axios.defaults.baseURL="http://49.233.132.179:5000"
+    axios.defaults.baseURL = "http://localhost:5000";
+    // axios.defaults.baseURL="http://49.233.132.179:5000"
     // console.log(this);
   },
   data() {
@@ -87,40 +91,11 @@ export default {
       },
 
       newClf: false,
-      loading: false,
+      loadingDownload: false,
+      loadingCommit: false,
       errors: null,
-      res: {
-        length: 0,
-        dims: {
-          DEPI: [],
-          GAIN: [],
-          LOSS: [],
-          TATA1: [],
-          TATA2: [],
-          CHCS: [],
-          OTHREC: [],
-          GMI: [],
-          GMIII: [],
-          SGAI: [],
-          CHROA: [],
-          AQI: [],
-          LVGI: [],
-          DSRI: [],
-          SGI: [],
-          SOFTAS: [],
-          CHINV: [],
-          CHREC: []
-        },
-        scores: {
-          RandomForest: { label_0_score: [], label_1_score: [], score: [] },
-          LogisticRegression: {
-            label_0_score: [],
-            label_1_score: [],
-            score: []
-          }
-        }
-      },
 
+      results: [],
       methods: ["RandomForest", "LogisticRegression"],
       score_types: ["label_0_score", "label_1_score", "score"]
     };
@@ -152,28 +127,14 @@ export default {
       return [...col0, ...col1];
     },
     dataSource() {
-      const dims = this.dims;
-      const dicts = [];
-      const n = this.res.length;
-      for (let i = 0; i < n; i++) {
-        const dict = { key: i };
-        dims.forEach(dim => {
-          dict[dim] = this.res.dims[dim][i];
-        });
-        this.methods.forEach(method => {
-          this.score_types.forEach(type => {
-            dict[method + type] = this.res.scores[method][type][i];
-          });
-        });
-        dicts.push(dict);
-      }
-
-      return dicts;
+      return this.results.map((res, i) => {
+        return { ...res, key: i };
+      });
     }
   },
   methods: {
     commit() {
-      this.loading = true;
+      this.loadingCommit = true;
       this.errors = null;
       this.newClf = false;
 
@@ -182,13 +143,13 @@ export default {
           this.$refs.VDataSet.getDatasetOverview().then(dso => {
             this.$refs.VDataSet.handleDatasetOverview(dso.data);
             this.newClf = true;
-            this.loading = false;
+            this.loadingCommit = false;
           });
           this.handlePredicting(pred.data);
         })
         .catch(error => {
           // 请求失败处理
-          this.loading = false;
+          this.loadingCommit = false;
           this.errors = error;
           // console.log(error);
           alert("bug了,芮憨憨！！！");
@@ -203,12 +164,12 @@ export default {
       //       this.handlePredicting(pred.data);
       //       this.$refs.VDataSet.handleDatasetOverview(dso.data);
       //       this.newClf = true;
-      //       this.loading = false;
+      //       this.loadingCommit = false;
       //     })
       //   )
       //   .catch(error => {
       //     // 请求失败处理
-      //     this.loading = false;
+      //     this.loadingCommit = false;
       //     this.errors = error;
       //     // console.log(error);
       //     alert("bug了,芮憨憨！！！");
@@ -236,29 +197,34 @@ export default {
       this.scores = data;
       this.saveRes();
     },
+    handleSelectedDimsChange(selectedDims) {
+      this.selectedDims = selectedDims;
+      // console.log(this.selectedDims);
+    },
     saveRes() {
-      const { dims, scores } = this.res;
+      const result = {};
       // dims
+      const dimStatus = this.$refs.VDataSet.dimStatus;
       this.dims.forEach(d => {
-        if (this.$refs.VDataSet.dimStatus[d]) {
-          dims[d].push(1);
-        } else {
-          dims[d].push(0);
-        }
+        result[d] = dimStatus[d] ? 1 : 0;
       });
       // scores
       const methods = this.methods;
       const score_types = this.score_types;
       methods.forEach(method => {
         score_types.forEach(type => {
-          scores[method][type].push(this.scores[method][type]);
+          result[method + type] = this.scores[method][type];
         });
       });
-      this.res.length++;
+      this.results.push(result);
     },
-    handleSelectedDimsChange(selectedDims) {
-      this.selectedDims = selectedDims;
-      // console.log(this.selectedDims);
+    download() {
+      this.loadingDownload = true;
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(this.results);
+      XLSX.utils.book_append_sheet(wb, ws, "sheet1");
+      XLSX.writeFile(wb, "results.xlsx");
+      this.loadingDownload = false;
     }
   },
   watch: {}
@@ -273,5 +239,14 @@ export default {
   color: #2c3e50;
   margin: 0px 3% 0 3%;
   padding-top: 20px;
+}
+</style>
+<style scoped>
+.ant-btn {
+  margin-right: 8px;
+  margin-bottom: 12px;
+}
+.float-right {
+  text-align: right;
 }
 </style>

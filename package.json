@@ -13,7 +13,8 @@
     "core-js": "^3.6.4",
     "echarts": "^4.6.0",
     "echarts-gl": "^1.1.1",
-    "vue": "^2.6.11"
+    "vue": "^2.6.11",
+    "xlsx": "^0.15.5"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.2.0",

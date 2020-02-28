@@ -25,7 +25,6 @@
 
     <p>multiple</p>
     <a-input-number :min="0" :step="0.1" v-model="multiple" />
-    <a-divider />
   </a-card>
 </template>
 
