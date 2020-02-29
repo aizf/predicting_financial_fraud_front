@@ -48,9 +48,9 @@ export default {
   components: { VDataSet, VRandomForest, VLogisticRegression },
   mounted() {
     document.title = "芮憨憨";
-    axios.defaults.baseURL = "http://localhost:5000";
-    // axios.defaults.baseURL="http://49.233.132.179:5000"
-    console.log(this);
+    // axios.defaults.baseURL = "http://localhost:5000";
+    axios.defaults.baseURL="http://49.233.132.179:5000"
+    // console.log(this);
   },
   data() {
     return {
@@ -171,7 +171,7 @@ export default {
           // 请求失败处理
           this.loadingCommit = false;
           this.errors = error;
-          console.log(error);
+          // console.log(error);
           alert("bug了,芮憨憨！！！");
         });
 
