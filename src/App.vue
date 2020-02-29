@@ -50,7 +50,7 @@ export default {
     document.title = "芮憨憨";
     axios.defaults.baseURL = "http://localhost:5000";
     // axios.defaults.baseURL="http://49.233.132.179:5000"
-    // console.log(this);
+    console.log(this);
   },
   data() {
     return {
@@ -102,9 +102,10 @@ export default {
   },
   computed: {
     columns() {
+      const cols = [];
+      // dims
       const dims = this.dims;
-
-      const col0 = [
+      cols.push([
         {
           title: "dims",
           children: dims.map(d => ({
@@ -112,19 +113,37 @@ export default {
             dataIndex: d
           }))
         }
-      ];
+      ]);
 
-      const col1 = this.methods.map(method => {
-        return {
-          title: method,
-          children: this.score_types.map(type => ({
-            title: type,
-            dataIndex: method + type
-          }))
-        };
+      // number of dataset
+      cols.push(
+        ["train_noFraud", "train_fraud", "test_noFraud", "test_Fraud"].map(
+          d => ({
+            title: d,
+            dataIndex: d
+          })
+        )
+      );
+
+      // scores
+      cols.push(
+        this.methods.map(method => {
+          return {
+            title: method,
+            children: this.score_types.map(type => ({
+              title: type,
+              dataIndex: method + type
+            }))
+          };
+        })
+      );
+
+      return cols.reduce((res, d, i) => {
+        if (i === 0) {
+          return (res = d);
+        }
+        return (res = [...res, ...d]);
       });
-
-      return [...col0, ...col1];
     },
     dataSource() {
       return this.results.map((res, i) => {
@@ -142,6 +161,7 @@ export default {
         .then(pred => {
           this.$refs.VDataSet.getDatasetOverview().then(dso => {
             this.$refs.VDataSet.handleDatasetOverview(dso.data);
+            this.saveRes();
             this.newClf = true;
             this.loadingCommit = false;
           });
@@ -151,7 +171,7 @@ export default {
           // 请求失败处理
           this.loadingCommit = false;
           this.errors = error;
-          // console.log(error);
+          console.log(error);
           alert("bug了,芮憨憨！！！");
         });
 
@@ -195,7 +215,6 @@ export default {
     },
     handlePredicting(data) {
       this.scores = data;
-      this.saveRes();
     },
     handleSelectedDimsChange(selectedDims) {
       this.selectedDims = selectedDims;
@@ -203,11 +222,27 @@ export default {
     },
     saveRes() {
       const result = {};
-      // dims
+      // dims selected
+      // const dimStatus = this.$refs.VDataSet.dimStatus;
+      // this.dims.forEach(d => {
+      //   result[d] = dimStatus[d] ? 1 : 0;
+      // });
+
+      // dims significance
       const dimStatus = this.$refs.VDataSet.dimStatus;
+      let i = 0;
       this.dims.forEach(d => {
-        result[d] = dimStatus[d] ? 1 : 0;
+        result[d] = dimStatus[d]
+          ? this.scores.RandomForest.feature_importances[i++]
+          : "-";
       });
+
+      // number of dataset
+      result["train_noFraud"] = this.$refs.VDataSet.label_0_train;
+      result["train_fraud"] = this.$refs.VDataSet.label_1_train;
+      result["test_noFraud"] = this.$refs.VDataSet.label_0_test;
+      result["test_Fraud"] = this.$refs.VDataSet.label_1_test;
+
       // scores
       const methods = this.methods;
       const score_types = this.score_types;
