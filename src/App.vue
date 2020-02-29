@@ -4,6 +4,7 @@
       <VDataSet
         ref="VDataSet"
         :dims="dims"
+        @getDims="handleGetDims"
         @selectedDimsChange="handleSelectedDimsChange"
         :style="{width: '500px',float:'left'}"
       />
@@ -37,7 +38,6 @@
 
 <script>
 // import echarts from "echarts";
-import axios from "axios";
 import * as XLSX from "xlsx";
 import VDataSet from "@/components/VDataSet.vue";
 import VRandomForest from "@/components/VRandomForest.vue";
@@ -48,44 +48,29 @@ export default {
   components: { VDataSet, VRandomForest, VLogisticRegression },
   mounted() {
     document.title = "芮憨憨";
-    // axios.defaults.baseURL = "http://localhost:5000";
-    axios.defaults.baseURL="http://49.233.132.179:5000"
     // console.log(this);
   },
   data() {
     return {
-      dims: [
-        "DEPI",
-        "GAIN",
-        "LOSS",
-        "TATA1",
-        "TATA2",
-        "CHCS",
-        "OTHREC",
-        "GMI",
-        "GMIII",
-        "SGAI",
-        "CHROA",
-        "AQI",
-        "LVGI",
-        "DSRI",
-        "SGI",
-        "SOFTAS",
-        "CHINV",
-        "CHREC"
-      ],
+      dims: [],
       selectedDims: [],
       scores: {
         RandomForest: {
-          label_0_score: "...",
-          label_1_score: "...",
-          score: "...",
+          label_0_score_test: "...",
+          label_1_score_test: "...",
+          score_test: "...",
+          label_0_score_train: "...",
+          label_1_score_train: "...",
+          score_train: "...",
           feature_importances: "..."
         },
         LogisticRegression: {
-          label_0_score: "...",
-          label_1_score: "...",
-          score: "...",
+          label_0_score_test: "...",
+          label_1_score_test: "...",
+          score_test: "...",
+          label_0_score_train: "...",
+          label_1_score_train: "...",
+          score_train: "...",
           coef: "..."
         }
       },
@@ -97,7 +82,14 @@ export default {
 
       results: [],
       methods: ["RandomForest", "LogisticRegression"],
-      score_types: ["label_0_score", "label_1_score", "score"]
+      score_types: [
+        "label_0_score_test",
+        "label_1_score_test",
+        "score_test",
+        "label_0_score_train",
+        "label_1_score_train",
+        "score_train"
+      ]
     };
   },
   computed: {
@@ -211,7 +203,14 @@ export default {
         });
         data["intercept"] = this.$refs.VLogisticRegression.custIntercept;
       }
-      return axios.post("/predicting_financial_fraud", data);
+      return this.$axios.post("/predicting_financial_fraud", data);
+    },
+    handleGetDims({ errors, dims }) {
+      if (errors) {
+        this.errors = errors;
+      } else {
+        this.dims = dims;
+      }
     },
     handlePredicting(data) {
       this.scores = data;

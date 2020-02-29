@@ -25,24 +25,47 @@
     </a-tabs>
 
     <a-divider />
+    <p>测试集</p>
     <a-row>
       <a-col :span="12">
         <p>未舞弊公司正确预测率：</p>
       </a-col>
       <a-col :span="12">
-        <p>{{scores.LogisticRegression.label_0_score}}</p>
+        <p>{{scores.LogisticRegression.label_0_score_test}}</p>
       </a-col>
       <a-col :span="12">
         <p>舞弊公司正确预测率：</p>
       </a-col>
       <a-col :span="12">
-        <p>{{scores.LogisticRegression.label_1_score}}</p>
+        <p>{{scores.LogisticRegression.label_1_score_test}}</p>
       </a-col>
       <a-col :span="12">
         <p>总体正确预测率：</p>
       </a-col>
       <a-col :span="12">
-        <p>{{scores.LogisticRegression.score}}</p>
+        <p>{{scores.LogisticRegression.score_test}}</p>
+      </a-col>
+    </a-row>
+    <a-divider />
+    <p>训练集</p>
+    <a-row>
+      <a-col :span="12">
+        <p>未舞弊公司正确预测率：</p>
+      </a-col>
+      <a-col :span="12">
+        <p>{{scores.LogisticRegression.label_0_score_train}}</p>
+      </a-col>
+      <a-col :span="12">
+        <p>舞弊公司正确预测率：</p>
+      </a-col>
+      <a-col :span="12">
+        <p>{{scores.LogisticRegression.label_1_score_train}}</p>
+      </a-col>
+      <a-col :span="12">
+        <p>总体正确预测率：</p>
+      </a-col>
+      <a-col :span="12">
+        <p>{{scores.LogisticRegression.score_train}}</p>
       </a-col>
     </a-row>
   </a-card>

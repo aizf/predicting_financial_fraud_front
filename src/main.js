@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import App from './App.vue'
-// import axios from 'axios';
+import axios from 'axios';
 
 import "ant-design-vue/dist/antd.css";
 import {
@@ -18,7 +18,9 @@ import {
 } from 'ant-design-vue'
 
 // Vue.prototype.$message = message;
-// Vue.prototype.$axios = axios;
+// axios.defaults.baseURL = "http://localhost:5000";
+axios.defaults.baseURL = "http://49.233.132.179:5000";
+Vue.prototype.$axios = axios;
 
 Vue.use(Button);
 Vue.use(Card);

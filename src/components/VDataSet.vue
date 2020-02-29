@@ -29,7 +29,6 @@
 </template>
 
 <script>
-import axios from "axios";
 export default {
   name: "VDataSet",
   props: {
@@ -77,21 +76,33 @@ export default {
       return selectedDims;
     }
   },
-  mounted() {},
+  mounted() {
+    this.getDims();
+  },
   methods: {
     selectedDimsChange(item) {
       this.dimStatus[item] = !this.dimStatus[item];
       this.$emit("selectedDimsChange", this.selectedDims);
       //   console.log(this.selectedDims);
     },
+    getDims() {
+      return this.$axios
+        .post("/search_information", {
+          info: "dims"
+        })
+        .then(res => {
+          this.$emit("getDims", { errors: false, dims: res.data.dims });
+        })
+        .catch(error => {
+          // 请求失败处理
+          // console.log(error);
+          this.$emit("getDims", { errors: error, dims: [] });
+          alert("bug了,芮憨憨！！！");
+        });
+    },
     getDatasetOverview() {
-      return axios.post("/search_information", {
-        keys: [
-          "num_label_0_train",
-          "num_label_1_train",
-          "num_label_0_test",
-          "num_label_1_test"
-        ]
+      return this.$axios.post("/search_information", {
+        info: "dataset"
       });
     },
     handleDatasetOverview(data) {
