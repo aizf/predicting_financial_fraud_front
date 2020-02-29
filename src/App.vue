@@ -11,6 +11,7 @@
       <VRandomForest
         ref="VRandomForest"
         :scores="scores"
+        :dims="dims"
         :selectedDims="selectedDims"
         :style="{width: '360px',float:'left'}"
       />
