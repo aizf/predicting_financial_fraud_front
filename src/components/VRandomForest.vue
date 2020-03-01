@@ -4,9 +4,9 @@
     <a-input-number :min="1" :step="1" v-model="n_estimators" />
     <a-divider />
     <p>特征重要性</p>
-    <a-row v-for="dim in selectedDims" :key="dim">
-      <a-col :span="12">{{dim}}</a-col>
-      <a-col :span="12">{{scores.RandomForest.feature_importances[dims.indexOf(dim)]}}</a-col>
+    <a-row v-for="(val, key) in feature_importances" :key="key">
+      <a-col :span="12">{{key}}</a-col>
+      <a-col :span="12">{{val}}</a-col>
     </a-row>
     <a-divider />
     <p>测试集</p>
@@ -59,12 +59,16 @@
 export default {
   name: "VRandomForest",
   props: {
-    scores: Object,
-    dims: Array,
-    selectedDims: Array
+    scores: Object
   },
   data() {
     return { n_estimators: 10 };
+  },
+  computed: {
+    feature_importances() {
+      // console.log(this.scores.RandomForest.feature_importances);
+      return this.scores.RandomForest.feature_importances;
+    }
   },
   methods: {},
   watch: {}

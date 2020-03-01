@@ -11,8 +11,6 @@
       <VRandomForest
         ref="VRandomForest"
         :scores="scores"
-        :dims="dims"
-        :selectedDims="selectedDims"
         :style="{width: '360px',float:'left'}"
       />
       <VLogisticRegression
@@ -230,10 +228,9 @@ export default {
 
       // dims significance
       const dimStatus = this.$refs.VDataSet.dimStatus;
-      let i = 0;
       this.dims.forEach(d => {
         result[d] = dimStatus[d]
-          ? this.scores.RandomForest.feature_importances[i++]
+          ? this.scores.RandomForest.feature_importances[d]
           : "-";
       });
 
