@@ -61,7 +61,7 @@ export default {
           label_0_score_train: "...",
           label_1_score_train: "...",
           score_train: "...",
-          feature_importances: "..."
+          feature_importances: {}
         },
         LogisticRegression: {
           label_0_score_test: "...",
