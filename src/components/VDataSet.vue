@@ -97,7 +97,7 @@ export default {
           // 请求失败处理
           // console.log(error);
           this.$emit("getDims", { errors: error, dims: [] });
-          alert("bug了,芮憨憨！！！");
+          // alert("bug了,芮憨憨！！！");
         });
     },
     getDatasetOverview() {

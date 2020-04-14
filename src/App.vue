@@ -46,7 +46,7 @@ export default {
   name: "App",
   components: { VDataSet, VRandomForest, VLogisticRegression },
   mounted() {
-    document.title = "芮憨憨";
+    // document.title = "芮憨憨";
     // console.log(this);
   },
   data() {
@@ -163,7 +163,7 @@ export default {
           this.loadingCommit = false;
           this.errors = error;
           // console.log(error);
-          alert("bug了,芮憨憨！！！");
+          // alert("bug了,芮憨憨！！！");
         });
 
       // axios
